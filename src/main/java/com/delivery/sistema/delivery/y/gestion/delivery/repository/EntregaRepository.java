@@ -21,8 +21,12 @@ public interface EntregaRepository extends JpaRepository<Entrega, Long> {
     List<Entrega> findByRepartidorId(Long repartidorId);
 
     List<Entrega> findByEstadoEntrega(EstadoEntrega estadoEntrega);
+    
+    Page<Entrega> findByEstadoEntrega(EstadoEntrega estadoEntrega, Pageable pageable);
 
     List<Entrega> findByRepartidorIdAndEstadoEntrega(Long repartidorId, EstadoEntrega estadoEntrega);
+    
+    Page<Entrega> findByRepartidorIdAndEstadoEntrega(Long repartidorId, EstadoEntrega estadoEntrega, Pageable pageable);
 
     @Query("SELECT e FROM Entrega e WHERE e.repartidor.id = :repartidorId ORDER BY e.fechaInicio DESC")
     List<Entrega> findEntregasByRepartidorOrdenadas(@Param("repartidorId") Long repartidorId);
@@ -55,6 +59,9 @@ public interface EntregaRepository extends JpaRepository<Entrega, Long> {
     
     @Query("SELECT e FROM Entrega e WHERE e.estadoEntrega IN ('ASIGNADO', 'EN_CAMINO') ORDER BY e.fechaAsignacion ASC")
     List<Entrega> findEntregasActivas();
+    
+    @Query("SELECT e FROM Entrega e WHERE e.estadoEntrega IN ('ASIGNADO', 'EN_CAMINO') ORDER BY e.fechaAsignacion ASC")
+    Page<Entrega> findEntregasActivas(Pageable pageable);
     
     Page<Entrega> findByRepartidorId(Long repartidorId, Pageable pageable);
     

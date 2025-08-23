@@ -54,4 +54,9 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     List<Object[]> countMenusPorCategoria();
 
     boolean existsByRestauranteIdAndNombre(Long restauranteId, String nombre);
+
+    // Métodos adicionales requeridos por MenuService
+    Page<Menu> findByRestauranteIdAndDisponibleTrue(Long restauranteId, Pageable pageable);
+    
+    Page<Menu> findByCategoriaId(Long categoriaId, Pageable pageable);
 }

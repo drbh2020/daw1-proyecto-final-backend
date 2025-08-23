@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 public interface RepartidorRepository extends JpaRepository<Repartidor, Long> {
 
     List<Repartidor> findByEstado(EstadoRepartidor estado);
+    
+    Page<Repartidor> findByEstado(EstadoRepartidor estado, Pageable pageable);
 
     List<Repartidor> findByEstadoOrderByFechaRegistroAsc(EstadoRepartidor estado);
 

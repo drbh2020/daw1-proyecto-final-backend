@@ -61,4 +61,9 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     @Query("SELECT COUNT(p) FROM Pedido p WHERE p.restaurante.id = :restauranteId AND p.fechaPedido BETWEEN :fechaInicio AND :fechaFin")
     Long countPedidosByRestauranteAndFechas(@Param("restauranteId") Long restauranteId, @Param("fechaInicio") LocalDateTime fechaInicio, @Param("fechaFin") LocalDateTime fechaFin);
+
+    // Métodos adicionales con Pageable requeridos por PedidoService
+    Page<Pedido> findByRestauranteIdAndEstado(Long restauranteId, EstadoPedido estado, Pageable pageable);
+    
+    Page<Pedido> findByEstado(EstadoPedido estado, Pageable pageable);
 }
