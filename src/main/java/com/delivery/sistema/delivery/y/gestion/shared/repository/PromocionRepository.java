@@ -13,27 +13,27 @@ import java.util.Optional;
 @Repository
 public interface PromocionRepository extends JpaRepository<Promocion, Long> {
 
-    List<Promocion> findByActivaTrueOrderByFechaCreacionDesc();
+    List<Promocion> findByActivoTrueOrderByFechaCreacionDesc();
 
-    List<Promocion> findByRestauranteIdAndActivaTrueOrderByFechaCreacionDesc(Long restauranteId);
+    List<Promocion> findByRestauranteIdAndActivoTrueOrderByFechaCreacionDesc(Long restauranteId);
 
-    @Query("SELECT p FROM Promocion p WHERE p.activa = true AND p.fechaInicio <= :ahora AND p.fechaFin >= :ahora ORDER BY p.fechaCreacion DESC")
+    @Query("SELECT p FROM Promocion p WHERE p.activo = true AND p.fechaInicio <= :ahora AND p.fechaFin >= :ahora ORDER BY p.fechaCreacion DESC")
     List<Promocion> findPromocionesVigentes(@Param("ahora") LocalDateTime ahora);
 
-    @Query("SELECT p FROM Promocion p WHERE p.restaurante.id = :restauranteId AND p.activa = true AND p.fechaInicio <= :ahora AND p.fechaFin >= :ahora ORDER BY p.fechaCreacion DESC")
+    @Query("SELECT p FROM Promocion p WHERE p.restaurante.id = :restauranteId AND p.activo = true AND p.fechaInicio <= :ahora AND p.fechaFin >= :ahora ORDER BY p.fechaCreacion DESC")
     List<Promocion> findPromocionesVigentesByRestaurante(@Param("restauranteId") Long restauranteId, @Param("ahora") LocalDateTime ahora);
 
-    @Query("SELECT p FROM Promocion p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')) AND p.activa = true")
-    List<Promocion> findByNombreContainingIgnoreCaseAndActivaTrue(@Param("nombre") String nombre);
+    @Query("SELECT p FROM Promocion p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')) AND p.activo = true")
+    List<Promocion> findByNombreContainingIgnoreCaseAndActivoTrue(@Param("nombre") String nombre);
 
-    @Query("SELECT COUNT(p) FROM Promocion p WHERE p.restaurante.id = :restauranteId AND p.activa = true")
+    @Query("SELECT COUNT(p) FROM Promocion p WHERE p.restaurante.id = :restauranteId AND p.activo = true")
     Long countPromocionesActivasByRestaurante(@Param("restauranteId") Long restauranteId);
 
-    @Query("SELECT p FROM Promocion p WHERE p.fechaFin < :ahora AND p.activa = true")
+    @Query("SELECT p FROM Promocion p WHERE p.fechaFin < :ahora AND p.activo = true")
     List<Promocion> findPromocionesVencidas(@Param("ahora") LocalDateTime ahora);
 
     @Query("SELECT p FROM Promocion p WHERE p.fechaInicio BETWEEN :fechaInicio AND :fechaFin ORDER BY p.fechaInicio ASC")
     List<Promocion> findPromocionesByRangoFechas(@Param("fechaInicio") LocalDateTime fechaInicio, @Param("fechaFin") LocalDateTime fechaFin);
 
-    boolean existsByRestauranteIdAndNombreAndActivaTrue(Long restauranteId, String nombre);
+    boolean existsByRestauranteIdAndNombreAndActivoTrue(Long restauranteId, String nombre);
 }
