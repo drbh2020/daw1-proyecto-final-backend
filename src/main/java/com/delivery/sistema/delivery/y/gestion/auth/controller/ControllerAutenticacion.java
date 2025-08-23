@@ -4,6 +4,7 @@ import com.delivery.sistema.delivery.y.gestion.auth.dto.Registre;
 import com.delivery.sistema.delivery.y.gestion.auth.dto.Respuesta;
 import com.delivery.sistema.delivery.y.gestion.auth.dto.Solicitud;
 import com.delivery.sistema.delivery.y.gestion.auth.service.AuthServicio;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +18,12 @@ public class ControllerAutenticacion {
     }
 
     @PostMapping("/registro")
-    public ResponseEntity<Respuesta> registrar(@RequestBody Registre registro) {
+    public ResponseEntity<Respuesta> registrar(@Valid @RequestBody Registre registro) {
         return ResponseEntity.ok(authServicio.registrar(registro));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Respuesta> login(@RequestBody Solicitud solicitud) {
+    public ResponseEntity<Respuesta> login(@Valid @RequestBody Solicitud solicitud) {
         return ResponseEntity.ok(authServicio.login(solicitud));
     }
 }

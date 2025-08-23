@@ -1,6 +1,7 @@
 package com.delivery.sistema.delivery.y.gestion.restaurante.controller;
 
 import com.delivery.sistema.delivery.y.gestion.restaurante.service.CategoriaService;
+import com.delivery.sistema.delivery.y.gestion.restaurante.dto.CategoriaDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -39,16 +40,15 @@ public class CategoriaController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> crearCategoria(@Valid @RequestBody Object categoriaDto) {
-        // TODO: Crear CategoriaDto
+    public ResponseEntity<CategoriaDto> crearCategoria(@Valid @RequestBody CategoriaDto categoriaDto) {
         return ResponseEntity.ok(categoriaService.crearCategoria(categoriaDto));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> actualizarCategoria(
+    public ResponseEntity<CategoriaDto> actualizarCategoria(
             @PathVariable Long id,
-            @Valid @RequestBody Object categoriaDto) {
+            @Valid @RequestBody CategoriaDto categoriaDto) {
         return ResponseEntity.ok(categoriaService.actualizarCategoria(id, categoriaDto));
     }
 
