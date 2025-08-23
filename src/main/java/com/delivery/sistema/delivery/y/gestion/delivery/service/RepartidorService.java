@@ -5,6 +5,11 @@ import com.delivery.sistema.delivery.y.gestion.cliente.model.Cliente;
 import com.delivery.sistema.delivery.y.gestion.delivery.model.EstadoRepartidor;
 import com.delivery.sistema.delivery.y.gestion.delivery.repository.RepartidorRepository;
 import com.delivery.sistema.delivery.y.gestion.cliente.repository.ClienteRepository;
+import com.delivery.sistema.delivery.y.gestion.delivery.dto.RepartidorDto;
+import com.delivery.sistema.delivery.y.gestion.delivery.dto.EntregaDto;
+
+import java.util.Map;
+import java.util.HashMap;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -111,7 +116,7 @@ public class RepartidorService {
         repartidorRepository.delete(repartidor);
     }
 
-    public Repartidor cambiarEstado(Long id, EstadoRepartidor nuevoEstado) {
+    private Repartidor cambiarEstadoInterno(Long id, EstadoRepartidor nuevoEstado) {
         Repartidor repartidor = obtenerPorId(id);
         
         // Validaciones de cambio de estado
@@ -124,15 +129,15 @@ public class RepartidorService {
     }
 
     public Repartidor marcarLibre(Long id) {
-        return cambiarEstado(id, EstadoRepartidor.LIBRE);
+        return cambiarEstadoInterno(id, EstadoRepartidor.LIBRE);
     }
 
     public Repartidor marcarOcupado(Long id) {
-        return cambiarEstado(id, EstadoRepartidor.OCUPADO);
+        return cambiarEstadoInterno(id, EstadoRepartidor.OCUPADO);
     }
 
     public Repartidor marcarInactivo(Long id) {
-        return cambiarEstado(id, EstadoRepartidor.INACTIVO);
+        return cambiarEstadoInterno(id, EstadoRepartidor.INACTIVO);
     }
 
     public Repartidor activar(Long id) {
@@ -197,5 +202,107 @@ public class RepartidorService {
     public Repartidor obtenerConEntregas(Long id) {
         return repartidorRepository.findByIdWithEntregas(id)
                 .orElseThrow(() -> new EntityNotFoundException("Repartidor no encontrado con ID: " + id));
+    }
+
+    // Métodos adicionales requeridos por RepartidorController
+    @Transactional(readOnly = true)
+    public Page<RepartidorDto> listarRepartidoresDisponibles(Pageable pageable) {
+        return repartidorRepository.findByDisponibleTrue(pageable).map(this::convertirADto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<RepartidorDto> listarRepartidoresPorEstado(EstadoRepartidor estado, Pageable pageable) {
+        return repartidorRepository.findByEstado(estado, pageable).map(this::convertirADto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<RepartidorDto> listarRepartidores(Pageable pageable) {
+        return repartidorRepository.findAll(pageable).map(this::convertirADto);
+    }
+
+    public RepartidorDto obtenerRepartidorPorId(Long id) {
+        return convertirADto(obtenerPorId(id));
+    }
+
+    public RepartidorDto crearRepartidor(RepartidorDto repartidorDto) {
+        Repartidor repartidor = convertirAEntidad(repartidorDto);
+        return convertirADto(crear(repartidor));
+    }
+
+    public RepartidorDto actualizarRepartidor(Long id, RepartidorDto repartidorDto) {
+        Repartidor repartidor = convertirAEntidad(repartidorDto);
+        return convertirADto(actualizar(id, repartidor));
+    }
+
+    // Métodos de conversión DTO
+    private RepartidorDto convertirADto(Repartidor repartidor) {
+        RepartidorDto dto = new RepartidorDto();
+        dto.setId(repartidor.getId());
+        dto.setClienteId(repartidor.getCliente().getId());
+        dto.setTelefono(repartidor.getTelefono());
+        dto.setVehiculo(repartidor.getVehiculo());
+        dto.setDisponible(repartidor.getDisponible());
+        dto.setEstado(repartidor.getEstado());
+        dto.setFechaRegistro(repartidor.getFechaRegistro());
+        return dto;
+    }
+
+    private Repartidor convertirAEntidad(RepartidorDto dto) {
+        Repartidor repartidor = new Repartidor();
+        Cliente cliente = clienteRepository.findById(dto.getClienteId())
+                .orElseThrow(() -> new EntityNotFoundException("Cliente no encontrado con ID: " + dto.getClienteId()));
+        repartidor.setCliente(cliente);
+        repartidor.setTelefono(dto.getTelefono());
+        repartidor.setVehiculo(dto.getVehiculo());
+        repartidor.setDisponible(dto.getDisponible());
+        repartidor.setEstado(dto.getEstado());
+        return repartidor;
+    }
+
+    // Métodos adicionales requeridos por RepartidorController
+    public RepartidorDto cambiarDisponibilidad(Long id, boolean disponible) {
+        Repartidor repartidor = obtenerPorId(id);
+        repartidor.setDisponible(disponible);
+        if (!disponible) {
+            repartidor.setEstado(EstadoRepartidor.INACTIVO);
+        } else {
+            repartidor.setEstado(EstadoRepartidor.LIBRE);
+        }
+        return convertirADto(repartidorRepository.save(repartidor));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> obtenerEstadisticasRepartidores() {
+        Map<String, Object> estadisticas = new HashMap<>();
+        estadisticas.put("total", contarTotal());
+        estadisticas.put("disponibles", contarDisponibles());
+        estadisticas.put("libres", contarPorEstado(EstadoRepartidor.LIBRE));
+        estadisticas.put("ocupados", contarPorEstado(EstadoRepartidor.OCUPADO));
+        estadisticas.put("inactivos", contarPorEstado(EstadoRepartidor.INACTIVO));
+        return estadisticas;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<EntregaDto> obtenerHistorialEntregas(Long repartidorId, Pageable pageable) {
+        // Este método requiere integración con EntregaService
+        // Por ahora retornamos una página vacía
+        return Page.empty(pageable);
+    }
+
+    public void eliminarRepartidor(Long id) {
+        eliminar(id);
+    }
+
+    // Método adicional que devuelve DTO para el Controller
+    public RepartidorDto cambiarEstado(Long id, EstadoRepartidor nuevoEstado) {
+        Repartidor repartidor = obtenerPorId(id);
+        
+        // Validaciones de cambio de estado
+        if (nuevoEstado == EstadoRepartidor.OCUPADO && !repartidor.getDisponible()) {
+            throw new IllegalStateException("No se puede ocupar un repartidor no disponible");
+        }
+
+        repartidor.setEstado(nuevoEstado);
+        return convertirADto(repartidorRepository.save(repartidor));
     }
 }

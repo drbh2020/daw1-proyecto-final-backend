@@ -2,8 +2,11 @@ package com.delivery.sistema.delivery.y.gestion.restaurante.service;
 
 import com.delivery.sistema.delivery.y.gestion.restaurante.model.Categoria;
 import com.delivery.sistema.delivery.y.gestion.restaurante.repository.CategoriaRepository;
+import com.delivery.sistema.delivery.y.gestion.restaurante.dto.CategoriaDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,10 +108,10 @@ public class CategoriaService {
         categoriaRepository.save(categoria);
     }
 
-    public void cambiarOrden(Long id, Integer nuevoOrden) {
+    public CategoriaDto cambiarOrden(Long id, Integer nuevoOrden) {
         Categoria categoria = obtenerPorId(id);
         categoria.setOrdenMostrar(nuevoOrden);
-        categoriaRepository.save(categoria);
+        return convertirADto(categoriaRepository.save(categoria));
     }
 
     @Transactional(readOnly = true)
@@ -130,5 +133,70 @@ public class CategoriaService {
     public Categoria obtenerConMenus(Long id) {
         return categoriaRepository.findByIdWithMenus(id)
                 .orElseThrow(() -> new EntityNotFoundException("Categoría no encontrada con ID: " + id));
+    }
+
+    // Métodos adicionales requeridos por CategoriaController
+    @Transactional(readOnly = true)
+    public Page<CategoriaDto> listarCategoriasActivas(Pageable pageable) {
+        return categoriaRepository.findByActivoTrueOrderByOrdenMostrarAsc(pageable).map(this::convertirADto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CategoriaDto> listarCategorias(Pageable pageable) {
+        return categoriaRepository.findAllByOrderByOrdenMostrarAsc(pageable).map(this::convertirADto);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoriaDto> listarCategoriasOrdenadas() {
+        return categoriaRepository.findByActivoTrueOrderByOrdenMostrarAsc().stream()
+                .map(this::convertirADto)
+                .toList();
+    }
+
+    public CategoriaDto obtenerCategoriaPorId(Long id) {
+        return convertirADto(obtenerPorId(id));
+    }
+
+    public CategoriaDto crearCategoria(CategoriaDto categoriaDto) {
+        Categoria categoria = convertirAEntidad(categoriaDto);
+        return convertirADto(crear(categoria));
+    }
+
+    public CategoriaDto actualizarCategoria(Long id, CategoriaDto categoriaDto) {
+        Categoria categoria = convertirAEntidad(categoriaDto);
+        return convertirADto(actualizar(id, categoria));
+    }
+
+    public CategoriaDto cambiarEstado(Long id, boolean activo) {
+        if (activo) {
+            activar(id);
+        } else {
+            desactivar(id);
+        }
+        return convertirADto(obtenerPorId(id));
+    }
+
+    public void eliminarCategoria(Long id) {
+        eliminar(id);
+    }
+
+    // Métodos de conversión DTO
+    private CategoriaDto convertirADto(Categoria categoria) {
+        CategoriaDto dto = new CategoriaDto();
+        dto.setId(categoria.getId());
+        dto.setNombre(categoria.getNombre());
+        dto.setDescripcion(categoria.getDescripcion());
+        dto.setActivo(categoria.getActivo());
+        dto.setOrdenMostrar(categoria.getOrdenMostrar());
+        return dto;
+    }
+
+    private Categoria convertirAEntidad(CategoriaDto dto) {
+        Categoria categoria = new Categoria();
+        categoria.setNombre(dto.getNombre());
+        categoria.setDescripcion(dto.getDescripcion());
+        categoria.setActivo(dto.getActivo());
+        categoria.setOrdenMostrar(dto.getOrdenMostrar());
+        return categoria;
     }
 }
