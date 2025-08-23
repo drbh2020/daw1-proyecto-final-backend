@@ -1,5 +1,6 @@
 package com.delivery.sistema.delivery.y.gestion.auth.dto;
 
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,8 +8,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Solicitud {
-    private String nombre;
+    
+    @NotBlank(message = "El email es obligatorio")
+    @Email(message = "Debe proporcionar un email válido")
     private String email;
+    
+    @NotBlank(message = "La contraseña es obligatoria")
     private String password;
-    private String direccion;
 }

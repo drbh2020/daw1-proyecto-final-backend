@@ -22,13 +22,15 @@ public class RepartidorDto {
     
     private String clienteEmail;
     
-    @NotBlank(message = "El vehículo es obligatorio")
+    @NotBlank(message = "El teléfono es obligatorio")
+    @Size(max = 20, message = "El teléfono no puede exceder 20 caracteres")
+    @Pattern(regexp = "^[0-9+\\-\\s()]+$", message = "El teléfono debe tener formato válido")
+    private String telefono;
+    
     @Size(max = 50, message = "El vehículo no puede exceder 50 caracteres")
     private String vehiculo;
     
-    @Pattern(regexp = "^[A-Z0-9]{6,8}$", message = "La placa debe tener formato válido")
-    @Size(max = 8, message = "La placa no puede exceder 8 caracteres")
-    private String placa;
+    private Boolean disponible = true;
     
     private EstadoRepartidor estado = EstadoRepartidor.LIBRE;
     
