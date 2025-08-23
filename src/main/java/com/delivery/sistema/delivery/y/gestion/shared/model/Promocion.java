@@ -1,5 +1,6 @@
 package com.delivery.sistema.delivery.y.gestion.shared.model;
 
+import com.delivery.sistema.delivery.y.gestion.restaurante.model.Restaurante;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -20,6 +21,11 @@ public class Promocion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "El restaurante es obligatorio")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurante_id", nullable = false)
+    private Restaurante restaurante;
+
     @NotBlank(message = "El nombre de la promoción es obligatorio")
     @Size(max = 100, message = "El nombre no puede exceder 100 caracteres")
     @Column(nullable = false)
@@ -28,11 +34,19 @@ public class Promocion {
     @Size(max = 500, message = "La descripción no puede exceder 500 caracteres")
     private String descripcion;
 
-    @NotNull(message = "El descuento es obligatorio")
-    @DecimalMin(value = "0.0", inclusive = true, message = "El descuento no puede ser negativo")
-    @DecimalMax(value = "100.0", message = "El descuento no puede ser mayor a 100%")
-    @Column(precision = 5, scale = 2, nullable = false)
-    private BigDecimal descuento;
+    @NotNull(message = "El tipo de promoción es obligatorio")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoPromocion tipo;
+
+    @NotNull(message = "El valor es obligatorio")
+    @DecimalMin(value = "0.0", inclusive = true, message = "El valor no puede ser negativo")
+    @Column(precision = 8, scale = 2, nullable = false)
+    private BigDecimal valor;
+
+    @Size(max = 20, message = "El código no puede exceder 20 caracteres")
+    @Column(unique = true, length = 20)
+    private String codigo;
 
     @NotNull(message = "La fecha de inicio es obligatoria")
     @Column(name = "fecha_inicio", nullable = false)
@@ -42,8 +56,18 @@ public class Promocion {
     @Column(name = "fecha_fin", nullable = false)
     private LocalDateTime fechaFin;
 
+    @DecimalMin(value = "0.0", message = "El monto mínimo no puede ser negativo")
+    @Column(name = "monto_minimo", precision = 10, scale = 2)
+    private BigDecimal montoMinimo = BigDecimal.ZERO;
+
     @Column(nullable = false)
-    private Boolean activa = true;
+    private Boolean activo = true;
+
+    @Column(name = "usos_maximos")
+    private Integer usosMaximos;
+
+    @Column(name = "usos_actuales", nullable = false)
+    private Integer usosActuales = 0;
 
     @CreationTimestamp
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
