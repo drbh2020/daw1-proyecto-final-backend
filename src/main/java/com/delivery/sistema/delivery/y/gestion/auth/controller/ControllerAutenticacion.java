@@ -1,8 +1,8 @@
 package com.delivery.sistema.delivery.y.gestion.auth.controller;
 
-import com.delivery.sistema.delivery.y.gestion.auth.dto.Registre;
-import com.delivery.sistema.delivery.y.gestion.auth.dto.Respuesta;
-import com.delivery.sistema.delivery.y.gestion.auth.dto.Solicitud;
+import com.delivery.sistema.delivery.y.gestion.auth.dto.RegistroClienteDto;
+import com.delivery.sistema.delivery.y.gestion.auth.dto.LoginResponseDto;
+import com.delivery.sistema.delivery.y.gestion.auth.dto.LoginRequestDto;
 import com.delivery.sistema.delivery.y.gestion.auth.service.AuthServicio;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +18,12 @@ public class ControllerAutenticacion {
     }
 
     @PostMapping("/registro")
-    public ResponseEntity<Respuesta> registrar(@Valid @RequestBody Registre registro) {
+    public ResponseEntity<LoginResponseDto> registrar(@Valid @RequestBody RegistroClienteDto registro) {
         return ResponseEntity.ok(authServicio.registrar(registro));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Respuesta> login(@Valid @RequestBody Solicitud solicitud) {
-        return ResponseEntity.ok(authServicio.login(solicitud));
+    public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
+        return ResponseEntity.ok(authServicio.login(loginRequestDto));
     }
 }

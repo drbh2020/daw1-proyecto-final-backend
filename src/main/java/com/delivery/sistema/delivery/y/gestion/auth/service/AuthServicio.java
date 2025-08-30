@@ -1,9 +1,9 @@
 package com.delivery.sistema.delivery.y.gestion.auth.service;
 
 
-import com.delivery.sistema.delivery.y.gestion.auth.dto.Registre;
-import com.delivery.sistema.delivery.y.gestion.auth.dto.Solicitud;
-import com.delivery.sistema.delivery.y.gestion.auth.dto.Respuesta;
+import com.delivery.sistema.delivery.y.gestion.auth.dto.RegistroClienteDto;
+import com.delivery.sistema.delivery.y.gestion.auth.dto.LoginRequestDto;
+import com.delivery.sistema.delivery.y.gestion.auth.dto.LoginResponseDto;
 import com.delivery.sistema.delivery.y.gestion.cliente.model.Cliente;
 import com.delivery.sistema.delivery.y.gestion.cliente.repository.ClienteRepository;
 import com.delivery.sistema.delivery.y.gestion.shared.security.JwtServicio;
@@ -23,7 +23,7 @@ public class AuthServicio {
     private final AuthenticationManager authManager;
     private final PasswordEncoder passwordEncoder;
 
-    public Respuesta registrar(Registre registro) {
+    public LoginResponseDto registrar(RegistroClienteDto registro) {
         Cliente cliente = new Cliente();
         cliente.setNombre(registro.getNombre());
         cliente.setEmail(registro.getEmail());
@@ -32,15 +32,15 @@ public class AuthServicio {
         clienteRepository.save(cliente);
 
         String token = jwtServicio.generarToken(registro.getEmail());
-        return new Respuesta(token);
+        return new LoginResponseDto(token);
     }
 
-    public Respuesta login(Solicitud solicitud) {
+    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(solicitud.getEmail(), solicitud.getPassword())
+                new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
         );
-        String token = jwtServicio.generarToken(solicitud.getEmail());
-        return new Respuesta(token);
+        String token = jwtServicio.generarToken(loginRequestDto.getEmail());
+        return new LoginResponseDto(token);
     }
 
 }
